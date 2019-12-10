@@ -1,7 +1,7 @@
 # mydata
 
-运行依赖java 1.8
-
-usage: java -jar mydata-1.1.jar filePath sheetName tableNameCell fieldNameCell expressCell
-
-例: java -jar mydata-1.1.jar ./example/example.xlsx Sheet1 A C D >result.c
+step:
+1. 安装java 1.8
+2. 配置文件config/mydata.properties
+3. 运行 java -jar mydata-1.1.jar > result.sql
+4. 结束

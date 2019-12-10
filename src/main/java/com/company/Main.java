@@ -21,23 +21,11 @@ import static com.company.RunPut.myAddressRand;
 import static java.lang.Thread.sleep;
 
 public class Main {
-    private String filePath;
-    private String sheetName;
-    private String tableNameCell;
-    private String fieldNameCell;
-    private String expressCell;
+    private MyConfig config;
     private List<DataTree> allData = new ArrayList();
     private List<String> expressReadFromExcel; //try{}catch{};
     private Constructor RunPutConstructor;
-    private int maxItemCount;
-
-    public Main(String filePath, String sheetName, String tableNameCell, String fieldNameCell, String expressCell) {
-        this.filePath = filePath;
-        this.sheetName = sheetName;
-        this.tableNameCell = tableNameCell;
-        this.fieldNameCell = fieldNameCell;
-        this.expressCell = expressCell;
-    }
+    private int maxCount;
 
     public void writeAddress() throws IOException, InterruptedException {
         BufferedWriter fw = new BufferedWriter(new FileWriter(Main.class.getClassLoader().getResource(addressFileName).getPath(), true));
@@ -112,7 +100,7 @@ public class Main {
             for (String express : expressReadFromExcel) {
                 putData.insertAfter(express);
             }
-            constructor = ctClass.toClass().getDeclaredConstructor(new Class[]{List.class});
+            constructor = ctClass.toClass().getDeclaredConstructor(List.class);
             constructor.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,14 +109,15 @@ public class Main {
     }
 
     private void init() throws Exception {
-        this.expressReadFromExcel = getExpresses(filePath, sheetName, tableNameCell, fieldNameCell, expressCell);
+        this.config = MyConfig.getMyConfig();
+        this.expressReadFromExcel = getExpresses(config.xlsxFile, config.sheetName, config.tableNameColumn, config.fieldNameColumn, config.expressColumn);
         this.RunPutConstructor = getRunPutConstructor(this.expressReadFromExcel);
-        this.maxItemCount = 100;
+        this.maxCount = config.maxCount;
     }
 
     private void start() throws InterruptedException, IllegalAccessException, InvocationTargetException, InstantiationException {
         ExecutorService ex = Executors.newFixedThreadPool(50);
-        for (int i = 0; i < this.maxItemCount; i++) {
+        for (int i = 0; i < this.maxCount; i++) {
             ex.submit((Runnable) this.RunPutConstructor.newInstance(new Object[]{this.allData}));
         }
 
@@ -142,12 +131,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        if (args.length < 5) {
-            System.out.println("usage: jar Main.jar filePath sheetName tableNameCell fieldNameCell expressCell");
-            return;
-        }
-
-        Main m = new Main(args[0], args[1], args[2], args[3], args[4]);
+        Main m = new Main();
         try {
             m.init();
             m.start();
@@ -161,4 +145,5 @@ public class Main {
                 System.out.println(sql);
         }
     }
+
 }
